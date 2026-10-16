@@ -1,24 +1,28 @@
----
+
 name: build
 
 on:
-   workflow_dispatch:
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
-      - name: Run Open Orbis Toolchain
-        uses: OpenOrbis/toolchain-action@main
-        with:
-          version: latest
-          command: cd hello_world; make; PkgTool.Core pkg_build pkg/pkg.gp4 .
+      - name: Build PS4 PKG
+        run: |
+          docker run --rm \
+            -w /workspace \
+            -v "$GITHUB_WORKSPACE:/workspace" \
+            openorbisofficial/toolchain:latest \
+            bash -lc 'cd hello_world && make && PkgTool.Core pkg_build pkg/pkg.gp4 .'
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
-          name: IV0000-BREW00083_00-HELLOWORLD000000.pkg
+          name: HelloWorld-PKG
           path: hello_world/IV0000-BREW00083_00-HELLOWORLD000000.pkg
+          if-no-files-found: error
